@@ -12,14 +12,17 @@ import {
 } from '@mui/material';
 import { AccountCircle, Business, Group, Category, ExitToApp, Dashboard } from '@mui/icons-material';
 import axios from 'axios';
-import { Link,useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
-
-const DrawerContainer = styled(Box)({
+const DrawerContainer = styled(Box)(({ theme }) => ({
     width: '250px',
     position: 'fixed',
     height: '100vh',
-});
+    [theme.breakpoints.down('sm')]: {
+        width: '100%',
+        height: 'auto',
+    },
+}));
 
 const DrawerContent = styled(Box)({
     padding: '20px',
@@ -43,18 +46,15 @@ const StyledListItemIcon = styled(ListItemIcon)({
     marginRight: '10px',
 });
 
-
 const AdminSideNav = () => {
-
     let { companyId } = useParams();
 
     const logoutCompany = async () => {
-        await axios.get('http://localhost:5000/companies/logout')
-
+        await axios.get('http://localhost:5000/companies/logout');
         localStorage.removeItem('firstLogin');
-
         window.location.replace('/company/login');
-    }
+    };
+
     return (
         <DrawerContainer sx={{ backgroundColor: 'hotpink' }}>
             <Drawer variant="permanent">
@@ -83,19 +83,21 @@ const AdminSideNav = () => {
                             </StyledListItemIcon>
                             <ListItemText primary="Employees" />
                         </StyledListItem>
-                        <StyledListItem button>
-                            <StyledListItemIcon>
-                                <Category />
-                            </StyledListItemIcon>
-                            <ListItemText primary="Employees Category" />
-                        </StyledListItem>
+                        <Link to={`/admin/EmployeCategory/${companyId}`}>
+                            <StyledListItem button>
+                                <StyledListItemIcon>
+                                    <Category />
+                                </StyledListItemIcon>
+                                <ListItemText primary="Employees Category" />
+                            </StyledListItem>
+                        </Link>
                         <Link to={`/admin/dashbord/${companyId}`}>
-                        <StyledListItem button>
-                            <StyledListItemIcon>
-                                <Dashboard />
-                            </StyledListItemIcon>
-                            <ListItemText primary="Dashboard" />
-                        </StyledListItem>
+                            <StyledListItem button>
+                                <StyledListItemIcon>
+                                    <Dashboard />
+                                </StyledListItemIcon>
+                                <ListItemText primary="Dashboard" />
+                            </StyledListItem>
                         </Link>
                     </List>
                     <StyledListItem button onClick={logoutCompany}>

@@ -8,6 +8,7 @@ import CompanyRegister from './components/auth/companyAuth/CompanyRegister';
 import AdminDashbord from './components/admin/admin_dashbord/AdminDashbord';
 import AdminSideNav from './components/admin/admin_side_nav/AdminSideNav'; // Import your SideNav component
 import AdminProfile from './components/admin/admin_profile/AdminProfile';
+import EmployeCategory from './components/admin/employee_category/EmployeCategory';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -52,6 +53,10 @@ function App() {
         <Route
           path="/admin/profile/:companyId"
           element={<AdminProfile />}
+        />
+        <Route
+          path="/admin/EmployeCategory/:companyId"
+          element={<EmployeCategory />}
         />
 
         {/* Show SideNav only when logged in */}
