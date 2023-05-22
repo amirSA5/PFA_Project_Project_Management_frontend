@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/system';
 import { Grid, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, TextareaAutosize, Table, TableContainer, TableHead, TableRow, TableCell, TableBody, IconButton, Box } from '@mui/material';
 import AdminSideNav from '../admin_side_nav/AdminSideNav';
 import DeleteIcon from '@mui/icons-material/Delete';
+import axios from 'axios';
 
 const AddCategoryButton = styled(Button)`
   margin-top: 16px;
@@ -20,6 +21,16 @@ const EmployeCategory = () => {
     const [categoryName, setCategoryName] = useState('');
     const [description, setDescription] = useState('');
     const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/companies/getAllEmployeeCategory")
+            .then((response) => {
+                setCategories(response.data);
+            })
+            .catch((err) => {
+                console.log(err);   
+            });
+    }, [categories]);
 
     const handleAddCategory = () => {
         setOpenModal(true);
@@ -39,17 +50,21 @@ const EmployeCategory = () => {
 
     const handleAdd = () => {
         const newCategory = {
-            name: categoryName,
+            category: categoryName,
             description: description,
         };
-        setCategories((prevCategories) => [...prevCategories, newCategory]);
+        axios.post("http://localhost:5000/companies/createEmployeeCategory", newCategory)
         setCategoryName('');
         setDescription('');
         setOpenModal(false);
     };
 
-    const handleDelete = (index) => {
-        setCategories((prevCategories) => prevCategories.filter((_, i) => i !== index));
+    const handleDelete = (_id) => {
+        axios.delete(`http://localhost:5000/companies/deleteEmployeeCategory/${_id}`)
+            .then((response) => {
+                console.log(response);
+            }
+            )
     };
 
     return (
@@ -80,12 +95,12 @@ const EmployeCategory = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {categories.map((category, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{category.name}</TableCell>
+                                {categories.map((category) => (
+                                    <TableRow key={category._id}>
+                                        <TableCell>{category.category}</TableCell>
                                         <TableCell>{category.description}</TableCell>
                                         <TableCell>
-                                            <IconButton onClick={() => handleDelete(index)}>
+                                            <IconButton onClick={() => handleDelete(category._id)}>
                                                 <DeleteIcon />
                                             </IconButton>
                                         </TableCell>
