@@ -4,6 +4,7 @@ import { Grid, Typography, Button, Dialog, DialogTitle, DialogContent, DialogAct
 import AdminSideNav from '../admin_side_nav/AdminSideNav';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 const AddCategoryButton = styled(Button)`
   margin-top: 16px;
@@ -21,16 +22,17 @@ const EmployeCategory = () => {
     const [categoryName, setCategoryName] = useState('');
     const [description, setDescription] = useState('');
     const [categories, setCategories] = useState([]);
+    let {companyId} = useParams()
 
     useEffect(() => {
-        axios.get("http://localhost:5000/companies/getAllEmployeeCategory")
+        axios.get(`http://localhost:5000/companies/getAllEmployeeCategory/${companyId}`)
             .then((response) => {
                 setCategories(response.data);
             })
             .catch((err) => {
                 console.log(err);   
             });
-    }, [categories]);
+    }, [categories,companyId]);
 
     const handleAddCategory = () => {
         setOpenModal(true);
@@ -50,10 +52,12 @@ const EmployeCategory = () => {
 
     const handleAdd = () => {
         const newCategory = {
+            companyId:companyId,
             category: categoryName,
             description: description,
         };
         axios.post("http://localhost:5000/companies/createEmployeeCategory", newCategory)
+        console.log(companyId)
         setCategoryName('');
         setDescription('');
         setOpenModal(false);
