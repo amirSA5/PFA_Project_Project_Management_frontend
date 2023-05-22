@@ -77,12 +77,14 @@ const AdminSideNav = () => {
                             </StyledListItemIcon>
                             <ListItemText primary="My Projects" />
                         </StyledListItem>
+                        <Link to={`/admin/Employees/${companyId}`}>
                         <StyledListItem button>
                             <StyledListItemIcon>
                                 <Group />
                             </StyledListItemIcon>
                             <ListItemText primary="Employees" />
                         </StyledListItem>
+                        </Link>
                         <Link to={`/admin/EmployeCategory/${companyId}`}>
                             <StyledListItem button>
                                 <StyledListItemIcon>
