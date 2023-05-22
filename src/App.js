@@ -1,24 +1,63 @@
-import logo from './logo.svg';
+import { React, useState } from 'react';
 import './App.css';
+import Home from './components/home/Home';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import UserLogin from './components/auth/usersAuth/UserLogin';
+import CompanyLogin from './components/auth/companyAuth/CompanyLogin';
+import CompanyRegister from './components/auth/companyAuth/CompanyRegister';
+import AdminDashbord from './components/admin/admin_dashbord/AdminDashbord';
+import AdminSideNav from './components/admin/admin_side_nav/AdminSideNav'; // Import your SideNav component
+import AdminProfile from './components/admin/admin_profile/AdminProfile';
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Function to handle login
+  const handleLogin = () => {
+    // Perform your login logic here
+    setIsLoggedIn(true);
+  };
+
+  // Function to handle logout
+  const handleLogout = () => {
+    // Perform your logout logic here
+    setIsLoggedIn(false);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+
+        {/* Authentification */}
+        <Route
+          path="/user/login"
+          element={<UserLogin handleLogin={handleLogin} />}
+        />
+
+        <Route
+          path="/company/login"
+          element={<CompanyLogin handleLogin={handleLogin} />}
+        />
+
+        {/* Register */}
+        <Route path="/company/register" element={<CompanyRegister />} />
+
+        {/* admin pages */}
+        <Route
+          path="/admin/dashbord/:companyId"
+          element={<AdminDashbord />}
+        />
+
+        <Route
+          path="/admin/profile/:companyId"
+          element={<AdminProfile />}
+        />
+
+        {/* Show SideNav only when logged in */}
+        {isLoggedIn && <AdminSideNav handleLogout={handleLogout} />}
+      </Routes>
+    </BrowserRouter>
   );
 }
 
