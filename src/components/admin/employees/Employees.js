@@ -8,10 +8,18 @@ const Employees = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [categories, setCategories] = useState([]);
     const [employees, setEmployees] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [employeeEmail, setEmployeeEmail] = useState('');
+    const [employeePassword, setEmployeePassword] = useState('');
+    const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+
     let { companyId } = useParams();
 
     useEffect(() => {
-        axios.get(`http://localhost:5000/companies/getAllEmployeeCategory/${companyId}`)
+        axios
+            .get(`http://localhost:5000/companies/getAllEmployeeCategory/${companyId}`)
             .then((response) => {
                 setCategories(response.data);
             })
@@ -19,14 +27,35 @@ const Employees = () => {
                 console.log(err);
             });
 
-        axios.get(`http://localhost:5000/companies/getAllEmployees/${companyId}`)
+        axios
+            .get(`http://localhost:5000/companies/getAllEmployee/${companyId}`)
             .then((response) => {
                 setEmployees(response.data);
             })
             .catch((err) => {
                 console.log(err);
             });
-    }, [companyId]);
+    }, [companyId, employees]);
+
+    const handleCategoryChange = (event) => {
+        setSelectedCategory(event.target.value);
+    };
+
+    const handleFirstNameChange = (event) => {
+        setFirstName(event.target.value);
+    };
+
+    const handleLastNameChange = (event) => {
+        setLastName(event.target.value);
+    };
+
+    const handleEmployeeEmailChange = (event) => {
+        setEmployeeEmail(event.target.value);
+    };
+
+    const handleEmployeePasswordChange = (event) => {
+        setEmployeePassword(event.target.value);
+    };
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
@@ -37,15 +66,79 @@ const Employees = () => {
     };
 
     const handleAddEmployee = () => {
-        // Add employee logic here
+        const newEmployee = {
+            companyId: companyId,
+            categoryId: selectedCategory,
+            firstName: firstName,
+            lastName: lastName,
+            email: employeeEmail,
+            password: employeePassword,
+        };
+        axios.post('http://localhost:5000/companies/createEmployee', newEmployee).then((response) => {
+            console.log(response.data);
+            setEmployees([...employees, response.data]);
+            handleCloseModal();
+        });
     };
 
-    const handleUpdateEmployee = (employeeId) => {
-        // Update employee logic here
+    const handleUpdateEmployeeModal = (employeeId) => {
+        setIsModalOpen(true);
+        setSelectedEmployeeId(employeeId);
+        const employee = employees.find((employee) => employee._id === employeeId);
+        setSelectedCategory(employee.categoryId);
+        setFirstName(employee.firstName);
+        setLastName(employee.lastName);
+        setEmployeeEmail(employee.email);
+        setEmployeePassword(employee.password);
+    };
+
+    const handleUpdateEmployee = () => {
+        const updatedEmployee = {
+            categoryId: selectedCategory,
+            firstName: firstName,
+            lastName: lastName,
+            email: employeeEmail,
+            password: employeePassword,
+        };
+        axios
+            .put(`http://localhost:5000/companies/updateEmployee/${selectedEmployeeId}`, updatedEmployee)
+            .then((response) => {
+                console.log(response.data);
+                setEmployees((prevEmployees) =>
+                    prevEmployees.map((employee) => {
+                        if (employee._id === selectedEmployeeId) {
+                            return response.data;
+                        } else {
+                            return employee;
+                        }
+                    })
+                );
+                handleCloseModal();
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
+
+
+    
+    const handleUpdateModalClose = () => {
+        setSelectedEmployeeId(null);
+        setSelectedCategory('');
+        setFirstName('');
+        setLastName('');
+        setEmployeeEmail('');
+        setEmployeePassword('');
+        setIsModalOpen(false);
     };
 
     const handleDeleteEmployee = (employeeId) => {
-        // Delete employee logic here
+        axios
+            .delete(`http://localhost:5000/companies/deleteEmployee/${employeeId}`)
+            .then((response) => {
+                console.log(response);
+                setEmployees(employees.filter((employee) => employee._id !== employeeId));
+            });
     };
 
     return (
@@ -59,7 +152,7 @@ const Employees = () => {
                         Employees
                     </Typography>
                 </Box>
-                <Box display="flex" justifyContent="flex-start">
+                <Box display="flex" justifyContent="flex-start" mb={2}>
                     <Button variant="contained" color="primary" onClick={handleOpenModal}>
                         Add an Employee
                     </Button>
@@ -84,9 +177,9 @@ const Employees = () => {
                                         <TableCell>{employee.lastName}</TableCell>
                                         <TableCell>{employee.email}</TableCell>
                                         <TableCell>{employee.password}</TableCell>
-                                        <TableCell>{employee.category}</TableCell>
+                                        <TableCell>{employee.categoryId ? categories.find(category => category._id === employee.categoryId)?.category : ''}</TableCell>
                                         <TableCell>
-                                            <Button variant="contained" color="primary" onClick={() => handleUpdateEmployee(employee._id)}>
+                                            <Button variant="contained" color="primary" onClick={() => handleUpdateEmployeeModal(employee._id)}>
                                                 Update
                                             </Button>
                                             <Button variant="contained" color="error" onClick={() => handleDeleteEmployee(employee._id)}>
@@ -102,13 +195,13 @@ const Employees = () => {
                 <Modal open={isModalOpen} onClose={handleCloseModal}>
                     <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
                         <Typography variant="h6" component="h2" align="center" gutterBottom>
-                            Add Employee
+                            {selectedEmployeeId ? 'Update Employee' : 'Add Employee'}
                         </Typography>
-                        <TextField label="First Name" fullWidth margin="normal" />
-                        <TextField label="Last Name" fullWidth margin="normal" />
-                        <TextField label="Email" fullWidth margin="normal" />
-                        <TextField label="Password" type="password" fullWidth margin="normal" />
-                        <Select label="Category" fullWidth margin="normal">
+                        <TextField label="First Name" fullWidth margin="normal" value={firstName} onChange={handleFirstNameChange} />
+                        <TextField label="Last Name" fullWidth margin="normal" value={lastName} onChange={handleLastNameChange} />
+                        <TextField label="Email" fullWidth margin="normal" value={employeeEmail} onChange={handleEmployeeEmailChange} />
+                        <TextField label="Password" type="password" fullWidth margin="normal" value={employeePassword} onChange={handleEmployeePasswordChange} />
+                        <Select label="Category" fullWidth margin="normal" value={selectedCategory} onChange={handleCategoryChange}>
                             {categories.map((category) => (
                                 <MenuItem key={category._id} value={category._id}>
                                     {category.category}
@@ -116,10 +209,10 @@ const Employees = () => {
                             ))}
                         </Select>
                         <Box display="flex" justifyContent="space-between" mt={2}>
-                            <Button variant="contained" color="primary" onClick={handleAddEmployee}>
-                                Add
+                            <Button variant="contained" color="primary" onClick={selectedEmployeeId ? handleUpdateEmployee : handleAddEmployee}>
+                                {selectedEmployeeId ? 'Update' : 'Add'}
                             </Button>
-                            <Button variant="contained" color="error" onClick={handleCloseModal}>
+                            <Button variant="contained" style={{ backgroundColor: 'red' }} onClick={handleUpdateModalClose}>
                                 Close
                             </Button>
                         </Box>
